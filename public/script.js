@@ -19,15 +19,17 @@ const myVideo = document.getElementById('myVideo');
 const placeholder = document.getElementById('placeholder-screen');
 const copyCodeBtn = document.getElementById('copyCodeBtn');
 const flyingEmojiContainer = document.getElementById('flying-emoji-container');
+const overlay = document.getElementById('click-to-play-overlay'); // NEW
+const syncBtn = document.getElementById('syncBtn'); // NEW
 
 // State
 let currentRoom = null;
 let username = "Anonymous";
 let player; 
 let isYouTube = false;
-let isSyncing = false; // <--- NEW: Prevents infinite loops
+let isSyncing = false;
 
-// --- 1. AUTO-SAVE USERNAME (New Feature) ---
+// Auto-Save Username
 window.addEventListener('load', () => {
     const savedName = localStorage.getItem('vibe_username');
     if (savedName) {
@@ -37,7 +39,6 @@ window.addEventListener('load', () => {
 });
 
 // --- NAVIGATION ---
-
 createBtn.addEventListener('click', () => {
     const name = createNameInput.value.trim() || 'Host';
     const code = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -54,17 +55,13 @@ joinBtn.addEventListener('click', () => {
 function enterRoom(code, name) {
     currentRoom = code;
     username = name;
-    
-    // Save name for next time
     localStorage.setItem('vibe_username', name);
-
+    
     landingPage.classList.add('hidden');
     roomPage.classList.remove('hidden');
     roomDisplay.innerText = code;
 
-    // Join room event
     socket.emit('join_room', { room: code, user: name });
-    
     addSystemMessage(`You joined room: ${code}`);
 }
 
@@ -73,8 +70,23 @@ copyCodeBtn.addEventListener('click', () => {
     alert("Room Code Copied!");
 });
 
-// --- VIDEO LOGIC ---
+// --- BUTTON LOGIC: THE MOBILE FIX ---
+syncBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    
+    // Unmute and Play YouTube if available
+    if(isYouTube && player && typeof player.unMute === 'function') {
+        player.unMute();
+        player.playVideo();
+    } else if (!isYouTube) {
+        myVideo.play();
+    }
+    
+    // Ask server for the latest time immediately to ensure sync
+    socket.emit('request_sync', socket.id);
+});
 
+// --- VIDEO LOGIC ---
 loadBtn.addEventListener('click', () => {
     const url = videoUrlInput.value.trim();
     if(!url) return;
@@ -84,6 +96,10 @@ loadBtn.addEventListener('click', () => {
 
 function loadVideo(url) {
     placeholder.classList.add('hidden');
+    
+    // If I am loading the video, I don't need the overlay
+    overlay.classList.add('hidden');
+
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         isYouTube = true;
         myVideo.classList.add('hidden');
@@ -107,12 +123,13 @@ function loadVideo(url) {
         document.getElementById('player').classList.add('hidden');
         myVideo.classList.remove('hidden');
         myVideo.src = url;
-        myVideo.play();
+        myVideo.play().catch(e => {
+            console.log("Autoplay failed locally:", e);
+        });
     }
 }
 
-// --- SYNC LOGIC (FIXED FOR LOOPS) ---
-
+// --- SYNC LOGIC ---
 socket.on('request_sync', (requesterId) => {
     const url = videoUrlInput.value;
     if (!url) return;
@@ -122,42 +139,52 @@ socket.on('request_sync', (requesterId) => {
 });
 
 socket.on('receive_sync_data', (data) => {
-    isSyncing = true; // Lock events so we don't spam the server
-    videoUrlInput.value = data.url;
-    loadVideo(data.url);
+    isSyncing = true;
+    
+    // If URL is different, load it
+    if (videoUrlInput.value !== data.url) {
+        videoUrlInput.value = data.url;
+        loadVideo(data.url);
+        // Guests might need to click to join initially
+        overlay.classList.remove('hidden');
+    }
+
     setTimeout(() => {
-        if(isYouTube && player) { player.seekTo(data.time); if(data.isPlaying) player.playVideo(); }
-        else { myVideo.currentTime = data.time; if(data.isPlaying) myVideo.play(); }
-        isSyncing = false; // Unlock
+        if(isYouTube && player) { 
+            player.seekTo(data.time); 
+            if(data.isPlaying) player.playVideo(); 
+        } else { 
+            myVideo.currentTime = data.time; 
+            if(data.isPlaying) {
+                // Try to play. If browser blocks it, SHOW BUTTON.
+                var playPromise = myVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Autoplay blocked! Showing button.");
+                        overlay.classList.remove('hidden');
+                    });
+                }
+            }
+        }
+        isSyncing = false;
     }, 1000);
 });
 
 function onPlayerStateChange(event) {
-    if (isSyncing) return; // Stop loop if this change came from the server
-
-    if (event.data == YT.PlayerState.PLAYING) {
-        socket.emit('video_action', { room: currentRoom, type: 'play', time: player.getCurrentTime() });
-    } else if (event.data == YT.PlayerState.PAUSED) {
-        socket.emit('video_action', { room: currentRoom, type: 'pause' });
-    }
+    if (isSyncing) return;
+    if (event.data == YT.PlayerState.PLAYING) socket.emit('video_action', { room: currentRoom, type: 'play', time: player.getCurrentTime() });
+    else if (event.data == YT.PlayerState.PAUSED) socket.emit('video_action', { room: currentRoom, type: 'pause' });
 }
 
-// HTML5 Video Events
-myVideo.onplay = () => {
-    if (isSyncing) return;
-    socket.emit('video_action', { room: currentRoom, type: 'play', time: myVideo.currentTime });
-};
-myVideo.onpause = () => {
-    if (isSyncing) return;
-    socket.emit('video_action', { room: currentRoom, type: 'pause' });
-};
+myVideo.onplay = () => { if (!isSyncing) socket.emit('video_action', { room: currentRoom, type: 'play', time: myVideo.currentTime }); };
+myVideo.onpause = () => { if (!isSyncing) socket.emit('video_action', { room: currentRoom, type: 'pause' }); };
 
-// --- HANDLE INCOMING ACTIONS ---
 socket.on('sync_action', (data) => {
-    isSyncing = true; // Lock events
-
+    isSyncing = true;
     if (data.type === 'load') { 
-        videoUrlInput.value = data.url; loadVideo(data.url); 
+        videoUrlInput.value = data.url; 
+        loadVideo(data.url); 
+        overlay.classList.remove('hidden'); // Show button for guests on load
     } 
     else if (data.type === 'play') {
         if (isYouTube && player) { 
@@ -165,44 +192,34 @@ socket.on('sync_action', (data) => {
             player.playVideo(); 
         } else { 
             if(Math.abs(myVideo.currentTime - data.time) > 1) myVideo.currentTime = data.time; 
-            myVideo.play(); 
+            myVideo.play().catch(() => overlay.classList.remove('hidden')); 
         }
     } 
     else if (data.type === 'pause') {
-        if (isYouTube && player) player.pauseVideo(); 
-        else myVideo.pause();
+        if (isYouTube && player) player.pauseVideo(); else myVideo.pause();
     }
-
-    // Unlock after short delay
     setTimeout(() => { isSyncing = false; }, 500);
 });
 
-// --- CHAT LOGIC (With Sound) ---
-
+// --- CHAT & REACTION LOGIC (Unchanged) ---
 sendBtn.addEventListener('click', sendMessage);
 msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
 
 function sendMessage() {
     const msg = msgInput.value.trim();
     if(msg) {
-        // Optimistic UI
         addMessage(username, msg, true); 
         socket.emit('send_message', { room: currentRoom, user: username, text: msg });
         msgInput.value = '';
     }
 }
-
 socket.on('receive_message', (data) => {
     if (data.user !== username) {
         addMessage(data.user, data.text, false);
-        
-        // 2. Play Notification Sound (New Feature)
-        // Ensure you have <audio id="msg-sound" ...> in your HTML
         const sound = document.getElementById('msg-sound');
         if(sound) sound.play().catch(e => console.log("Audio play failed"));
     }
 });
-
 function addMessage(user, text, isSelf) {
     const div = document.createElement('div');
     div.classList.add('chat-msg');
@@ -211,25 +228,17 @@ function addMessage(user, text, isSelf) {
     chatWindow.appendChild(div);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-
 function addSystemMessage(text) {
     const div = document.createElement('div');
     div.classList.add('system-msg');
     div.innerText = text;
     chatWindow.appendChild(div);
 }
-
-// --- REACTIONS ---
-
 window.sendReaction = function(emoji) {
     socket.emit('send_reaction', { room: currentRoom, emoji: emoji });
     showFlyingEmoji(emoji);
 };
-
-socket.on('receive_reaction', (data) => {
-    showFlyingEmoji(data.emoji);
-});
-
+socket.on('receive_reaction', (data) => showFlyingEmoji(data.emoji));
 function showFlyingEmoji(emoji) {
     const el = document.createElement('div');
     el.innerText = emoji;
@@ -238,7 +247,4 @@ function showFlyingEmoji(emoji) {
     flyingEmojiContainer.appendChild(el);
     setTimeout(() => el.remove(), 3000);
 }
-
-socket.on('update_viewer_count', (count) => {
-    viewerCountDisplay.innerText = count;
-});
+socket.on('update_viewer_count', (count) => viewerCountDisplay.innerText = count);

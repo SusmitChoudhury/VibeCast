@@ -223,6 +223,21 @@ video, #player { width: 100%; height: 100%; }
     font-style: italic;
 }
 
+/* NEW: Click to Play Overlay Styles */
+#click-to-play-overlay {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85); /* Dark background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100; /* Ensure it is on TOP of the video */
+    backdrop-filter: blur(5px);
+}
+
 /* MOBILE FIXES */
 @media (max-width: 768px) {
     .room-layout {
