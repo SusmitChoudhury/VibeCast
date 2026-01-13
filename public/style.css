@@ -238,27 +238,58 @@ video, #player { width: 100%; height: 100%; }
     backdrop-filter: blur(5px);
 }
 
-/* MOBILE FIXES */
+/* === MOBILE LAYOUT FIXES === */
 @media (max-width: 768px) {
+    /* 1. Use 'dvh' to account for mobile browser bars */
     .room-layout {
-        flex-direction: column; /* Stack video on top of chat */
+        flex-direction: column; /* Stack vertically */
+        height: 100dvh; /* Dynamic viewport height (Critical Fix) */
+        width: 100%;
+        position: fixed;
     }
 
+    /* 2. Shrink Video Section */
     .video-stage {
-        height: 50vh; /* Video takes top half */
+        height: 38%; /* Video takes ~40% of screen */
+        flex-shrink: 0; /* Prevent it from squishing */
+        border-bottom: 1px solid #334155;
     }
 
+    /* 3. Expand Chat Section */
     .sidebar {
         width: 100%;
-        height: 50vh; /* Chat takes bottom half */
+        height: 62%; /* Chat takes remaining ~60% */
+        flex-grow: 1;
         border-left: none;
-        border-top: 1px solid #334155;
+        display: flex;
+        flex-direction: column;
     }
 
-    /* Hide flying emojis on phone to save battery */
-    #flying-emoji-container { display: none; }
+    /* 4. Fix Chat Scrolling */
+    .chat-area {
+        flex-grow: 1; /* Allow messages to expand */
+        height: 0; /* Force scrollbar to appear inside this area */
+    }
+
+    /* 5. Improve Touch Targets */
+    .reaction-bar button {
+        padding: 12px; 
+        font-size: 1.5rem; /* Bigger emojis for fingers */
+    }
+
+    .chat-input-area {
+        padding: 15px 10px; /* More space for typing */
+        background: #111b21; /* Solid background behind keyboard */
+    }
     
-    /* Adjust fonts */
-    .hero-content h1 { font-size: 2.5rem; }
-    .navbar { padding: 15px; }
+    /* 6. Adjust Top Bar for Mobile */
+    .top-bar {
+        padding: 5px 10px;
+        gap: 8px;
+    }
+    
+    .logo-small span { display: none; } /* Hide 'Cast' text to save space */
+    
+    /* Hide flying emojis on phone to save battery & screen space */
+    #flying-emoji-container { display: none; }
 }
