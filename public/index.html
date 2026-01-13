@@ -1,0 +1,233 @@
+<!-- for runing the server type in teminal 1. npm run dev   and   in brouser 2.http://localhost:3000 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeCast | Premium Watch Party</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <audio id="msg-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3" preload="auto"></audio>
+    <div id="landing-page">
+        
+        <nav class="navbar">
+            <div class="logo">Vibe<span class="highlight">Cast</span></div>
+            <div class="nav-links">
+                <a href="#hero">Home</a>
+                <a href="#features">Features</a>
+                <a href="#guide">How to Use</a>
+                <a href="#support">Support</a>
+            </div>
+        </nav>
+
+        <header id="hero" class="hero-section">
+            <div class="hero-content">
+                <h1>Stream & Chill <span class="highlight">Together.</span></h1>
+                <p class="subtitle">The ultimate way to watch YouTube or local videos in perfect sync with friends. No signup required.</p>
+
+                <div class="card-container">
+                    <div class="action-card">
+                        <div class="icon-circle"><i class="fas fa-plus"></i></div>
+                        <h2>Host Party</h2>
+                        <p>Start a new room as a Host.</p>
+                        <input type="text" id="createName" placeholder="Enter Your Name (Host)">
+                        <button id="createBtn" class="btn-grad">Create Room</button>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="icon-circle"><i class="fas fa-link"></i></div>
+                        <h2>Join Party</h2>
+                        <p>Join an existing room.</p>
+                        <input type="text" id="joinName" placeholder="Enter Your Name">
+                        <input type="text" id="joinCode" placeholder="Room Code (e.g. X7K9)">
+                        <button id="joinBtn" class="btn-grad">Join Room</button>
+                    </div>
+                </div>
+            </div>
+         <br>   
+            <div class="scroll-indicator">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </header>
+
+        <section id="features" class="info-section">
+            <div class="section-header">
+                <h2>Why Choose VibeCast?</h2>
+                <p>We bring the cinema experience to your browser.</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <i class="fas fa-sync-alt"></i>
+                    <h3>Perfect Sync</h3>
+                    <p>When you pause, it pauses for everyone. Millisecond-accurate synchronization keeps you all on the same beat.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>Live Chat</h3>
+                    <p>Discuss the movie in real-time with our integrated, WhatsApp-style chat interface. Never miss a reaction.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>Live Reactions</h3>
+                    <p>Express yourself with flying emojis like ❤️, 😂, and 🔥 that float over the video screen.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>No Lag</h3>
+                    <p>Built on high-speed WebSockets to ensure your connection remains stable and fast.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="guide-section">
+    <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Follow these steps to start your watch party.</p>
+    </div>
+
+    <div class="guide-container">
+        <div class="guide-col">
+            <h3><i class="fas fa-crown"></i> For Hosts</h3>
+            <ol>
+                <li>Enter your name and click <strong>"Create Room"</strong>.</li>
+                <li>Copy the <strong>Room Code</strong> (top right) and send it to friends.</li>
+                <li><strong>Paste a valid link:</strong>
+                    <ul>
+                        <li>✅ <strong>YouTube:</strong> (e.g. youtube.com/watch?v=...)</li>
+                        <li>✅ <strong>Direct File:</strong> Any link ending in .mp4, .webm, .mkv</li>
+                    </ul>
+                </li>
+                <li>Click <strong>"Load"</strong>. The video will sync automatically.</li>
+            </ol>
+        </div>
+
+        <div class="guide-col">
+            <h3><i class="fas fa-user-friends"></i> For Guests</h3>
+            <ol>
+                <li>Get the <strong>Room Code</strong> from the Host.</li>
+                <li>Enter your name and the Code in the <strong>"Join Party"</strong> box.</li>
+                <li>Click <strong>"Join Room"</strong>.</li>
+                <li>Wait! The video will start playing automatically once the Host loads it.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="compatibility-box">
+        <h3><i class="fas fa-exclamation-triangle"></i> Important: What Links Work?</h3>
+        <div class="compat-grid">
+            <div class="compat-item supported">
+                <h4>✅ Supported</h4>
+                <p>YouTube, Direct .mp4 files, Vimeo (Direct links), Public Cloud Files.</p>
+            </div>
+            <div class="compat-item unsupported">
+                <h4>❌ NOT Supported</h4>
+                <p>Netflix, Amazon Prime, Disney+, Hulu, HBO Max (Due to DRM protection).</p>
+            </div>
+        </div>
+        <p class="compat-note"><strong>Why?</strong> Paid streaming services block their videos from playing on outside websites like VibeCast.</p>
+    </div>
+</section>
+
+        <section id="support" class="support-section">
+            <div class="support-box">
+                <h2><i class="fas fa-headset"></i> Need Help?</h2>
+                <p>Having trouble connecting? Ensure you are using a valid YouTube link or a direct .mp4 file link. Ad-blockers may sometimes interfere with playback.</p>
+                <button class="btn-outline">Contact Support</button>
+            </div>
+        </section>
+
+        <footer class="main-footer">
+            <div class="footer-grid">
+                <div class="footer-col branding">
+                    <h4>Vibe<span class="highlight">Cast</span></h4>
+                    <p>The best way to watch together, apart.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#guide">User Guide</a>
+                    <a href="#room-page">Enter Room</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="#">FAQ</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">System Status</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p><strong>Privacy Notice:</strong> We do not store your chat logs or video history. Rooms are temporary and vanish when you leave.</p>
+                <div class="copyright">
+                    &copy; 2026 VibeCast. All rights reserved. | Developed by <span class="highlight">Susmit Choudhury</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <section id="room-page" class="room-layout hidden">
+        
+        <main class="video-stage">
+            <div class="top-bar">
+                <div class="logo-small">Vibe<span class="highlight">Cast</span></div>
+                <div class="input-group">
+                    <i class="fas fa-link"></i>
+                    <input type="text" id="videoUrl" placeholder="Paste YouTube Link or .mp4 URL here...">
+                </div>
+                <button id="loadBtn" class="btn-primary">Load</button>
+                <div class="viewer-count"><i class="fas fa-eye"></i> <span id="viewerCount">1</span></div>
+                <button id="copyCodeBtn" class="btn-secondary" title="Copy Code"><i class="fas fa-copy"></i> <span id="roomDisplay"></span></button>
+                <button id="exitBtn" class="btn-danger" onclick="location.reload()" title="Exit Room"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+
+            <div class="player-wrapper">
+                <div id="placeholder-screen">
+                    <i class="fas fa-film"></i>
+                    <p>Waiting for video...</p>
+                </div>
+                <div id="player" class="hidden"></div>
+                <video id="myVideo" controls class="hidden"></video>
+                
+                <div id="flying-emoji-container"></div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Live Chat</h3>
+            </div>
+            
+            <div class="chat-area" id="chatWindow">
+                <div class="system-msg">Welcome to the chat! 👋</div>
+            </div>
+
+            <div class="reaction-bar">
+                <button onclick="sendReaction('❤️')">❤️</button>
+                <button onclick="sendReaction('😂')">😂</button>
+                <button onclick="sendReaction('😮')">😮</button>
+                <button onclick="sendReaction('🔥')">🔥</button>
+                <button onclick="sendReaction('🎉')">🎉</button>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="msgInput" placeholder="Type a message...">
+                <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </aside>
+
+    </section>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script.js"></script>
+</body>
+</html>
